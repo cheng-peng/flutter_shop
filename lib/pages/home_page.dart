@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyrefresh/material_footer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import '../routers/application.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -72,11 +72,11 @@ class _HomePageState extends State<HomePage>
                       leaderPhone: leaderPhone,
                     ),
                     Recommend(recommendList: recommendList),
-                    FloorTitle(picture_address: floor1Title),
+                    FloorTitle(pictureAddress: floor1Title),
                     FloorContent(floorGoodsList: floorGoodsList1),
-                    FloorTitle(picture_address: floor2Title),
+                    FloorTitle(pictureAddress: floor2Title),
                     FloorContent(floorGoodsList: floorGoodsList2),
-                    FloorTitle(picture_address: floor3Title),
+                    FloorTitle(pictureAddress: floor3Title),
                     FloorContent(floorGoodsList: floorGoodsList3),
                     _hotGoods(),
                   ],
@@ -114,7 +114,9 @@ class _HomePageState extends State<HomePage>
     if (hotGoodsList.length != 0) {
       List<Widget> listWidget = hotGoodsList.map((val) {
         return InkWell(
-          onTap: () {},
+          onTap: () {
+            Application.router.navigateTo(context, '/detail?id=${val['goodsId']}');
+          },
           child: Container(
             width: ScreenUtil().setWidth(372),
             color: Colors.white,
@@ -184,9 +186,14 @@ class SwiperDiy extends StatelessWidget {
       width: ScreenUtil().setWidth(750),
       child: Swiper(
         itemBuilder: (BuildContext context, int index) {
-          return Image.network(
+          return InkWell(
+            onTap: (){
+              Application.router.navigateTo(context, "/detail?id=${swiperDataList[index]['goodsId']}");
+            },
+            child: Image.network(
             '${swiperDataList[index]['image']}',
             fit: BoxFit.fill,
+          ),
           );
         },
         itemCount: swiperDataList.length,
@@ -206,7 +213,7 @@ class TopNavigator extends StatelessWidget {
   Widget _grtidViewItemUI(BuildContext context, item) {
     return InkWell(
       onTap: () {
-        print('点击了导航');
+        Application.router.navigateTo(context, '/detail?id=${item['goodsId']}');
       },
       child: Column(
         children: <Widget>[
@@ -302,9 +309,11 @@ class Recommend extends StatelessWidget {
   }
 
   //商品单独项
-  Widget _item(index) {
+  Widget _item(context,index) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Application.router.navigateTo(context, '/detail?id=${recommendList[index]['goodsId']}');
+      },
       child: Container(
         height: ScreenUtil().setHeight(330),
         width: ScreenUtil().setWidth(250),
@@ -336,7 +345,7 @@ class Recommend extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: recommendList.length,
         itemBuilder: (context, index) {
-          return _item(index);
+          return _item(context,index);
         },
       ),
     );
@@ -345,8 +354,7 @@ class Recommend extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: ScreenUtil().setHeight(380),
-      margin: EdgeInsets.only(top: 10.0),
+      height: ScreenUtil().setHeight(450),
       child: Column(
         children: <Widget>[_titleWidget(), _recommendList()],
       ),
@@ -356,14 +364,14 @@ class Recommend extends StatelessWidget {
 
 //楼层标题
 class FloorTitle extends StatelessWidget {
-  final String picture_address;
+  final String pictureAddress;
 
-  const FloorTitle({Key key, this.picture_address}) : super(key: key);
+  const FloorTitle({Key key, this.pictureAddress}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Image.network(picture_address),
+      child: Image.network(pictureAddress),
     );
   }
 }
@@ -378,40 +386,40 @@ class FloorContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: Column(
-        children: <Widget>[_firstRow(), _otherGoods()],
+        children: <Widget>[_firstRow(context), _otherGoods(context)],
       ),
     );
   }
 
-  Widget _firstRow() {
+  Widget _firstRow(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItem(floorGoodsList[0]),
+        _goodsItem(context,floorGoodsList[0]),
         Column(
           children: <Widget>[
-            _goodsItem(floorGoodsList[1]),
-            _goodsItem(floorGoodsList[2]),
+            _goodsItem(context,floorGoodsList[1]),
+            _goodsItem(context,floorGoodsList[2]),
           ],
         ),
       ],
     );
   }
 
-  Widget _otherGoods() {
+  Widget _otherGoods(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItem(floorGoodsList[3]),
-        _goodsItem(floorGoodsList[4]),
+        _goodsItem(context,floorGoodsList[3]),
+        _goodsItem(context,floorGoodsList[4]),
       ],
     );
   }
 
-  Widget _goodsItem(Map goods) {
+  Widget _goodsItem(BuildContext context,Map goods) {
     return Container(
       width: ScreenUtil().setWidth(375),
       child: InkWell(
         onTap: () {
-          print('点击了楼层商品');
+          Application.router.navigateTo(context, 'detail?id=${goods['goodsId']}');
         },
         child: Image.network(goods['image']),
       ),
