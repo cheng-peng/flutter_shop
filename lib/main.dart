@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/provider/cart.dart';
+import 'package:flutter_shop/provider/current_index.dart';
 import 'package:flutter_shop/provider/details_info.dart';
 import './pages/index_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,6 +17,8 @@ void main() {
   var childCategory = ChildCategory();
   var categoryGoods = CategoryGoodsProvider();
   var detailsInfoProvide = DetailsInfoProvide();
+  var cartProvide = CartProvide();
+  var currentIndexProvide = CurrentIndexProvide();
   var providers = Providers();
 
   //.. 用该对象并返回该对象
@@ -22,7 +26,9 @@ void main() {
     ..provide(Provider<Counter>.value(counter))
     ..provide(Provider<ChildCategory>.value(childCategory))
     ..provide(Provider<CategoryGoodsProvider>.value(categoryGoods))
-    ..provide(Provider<DetailsInfoProvide>.value(detailsInfoProvide));
+    ..provide(Provider<DetailsInfoProvide>.value(detailsInfoProvide))
+    ..provide(Provider<CartProvide>.value(cartProvide))
+    ..provide(Provider<CurrentIndexProvide>.value(currentIndexProvide));
   runApp(ProviderNode(
     child: MyApp(),
     providers: providers,

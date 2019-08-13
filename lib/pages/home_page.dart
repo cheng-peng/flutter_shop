@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_shop/model/category.dart';
+import 'package:flutter_shop/provider/child_category.dart';
+import 'package:flutter_shop/provider/current_index.dart';
+import 'package:provide/provide.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../service/service_method.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -51,15 +55,14 @@ class _HomePageState extends State<HomePage>
             List<Map> floorGoodsList3 = (data['data']['floor3'] as List).cast();
 
             return EasyRefresh(
-                footer:ClassicalFooter(
-                  bgColor: Colors.white,
-                  textColor: Colors.pink,
-                  infoColor: Colors.pink,
-                  showInfo: true,
-                  noMoreText: '',
-                  infoText: '加载中',
-                  loadedText: '上拉加载'
-                ),
+                footer: ClassicalFooter(
+                    bgColor: Colors.white,
+                    textColor: Colors.pink,
+                    infoColor: Colors.pink,
+                    showInfo: true,
+                    noMoreText: '',
+                    infoText: '加载中',
+                    loadedText: '上拉加载'),
                 child: ListView(
                   children: <Widget>[
                     SwiperDiy(swiperDataList: swiper),
@@ -115,7 +118,8 @@ class _HomePageState extends State<HomePage>
       List<Widget> listWidget = hotGoodsList.map((val) {
         return InkWell(
           onTap: () {
-            Application.router.navigateTo(context, '/detail?id=${val['goodsId']}');
+            Application.router
+                .navigateTo(context, '/detail?id=${val['goodsId']}');
           },
           child: Container(
             width: ScreenUtil().setWidth(372),
@@ -187,13 +191,14 @@ class SwiperDiy extends StatelessWidget {
       child: Swiper(
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
-            onTap: (){
-              Application.router.navigateTo(context, "/detail?id=${swiperDataList[index]['goodsId']}");
+            onTap: () {
+              Application.router.navigateTo(
+                  context, "/detail?id=${swiperDataList[index]['goodsId']}");
             },
             child: Image.network(
-            '${swiperDataList[index]['image']}',
-            fit: BoxFit.fill,
-          ),
+              '${swiperDataList[index]['image']}',
+              fit: BoxFit.fill,
+            ),
           );
         },
         itemCount: swiperDataList.length,
@@ -210,10 +215,10 @@ class TopNavigator extends StatelessWidget {
 
   TopNavigator({Key key, this.navigatorList}) : super(key: key);
 
-  Widget _grtidViewItemUI(BuildContext context, item) {
+  Widget _grtidViewItemUI(BuildContext context, item, index) {
     return InkWell(
       onTap: () {
-        Application.router.navigateTo(context, '/detail?id=${item['goodsId']}');
+        _goCategory(context, index, item['mallCategoryId']);
       },
       child: Column(
         children: <Widget>[
@@ -227,6 +232,18 @@ class TopNavigator extends StatelessWidget {
     );
   }
 
+  void _goCategory(context, int index, String categroyId) async {
+    await request('getCategory').then((val) {
+      var data = json.decode(val.toString());
+      CategoryModel category = CategoryModel.fromJson(data);
+      List list = category.data;
+      Provide.value<ChildCategory>(context).changeCategory(categroyId, index);
+      Provide.value<ChildCategory>(context)
+          .getChildCategory(list[index].bxMallSubDto, categroyId);
+      Provide.value<CurrentIndexProvide>(context).changeIndex(1);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     //如果大于10，则删除后面数据
@@ -234,6 +251,7 @@ class TopNavigator extends StatelessWidget {
       this.navigatorList.removeRange(10, this.navigatorList.length);
     }
 
+    var tempIndex = -1;
     return Container(
       height: ScreenUtil().setHeight(320),
       padding: EdgeInsets.all(3.0),
@@ -242,7 +260,8 @@ class TopNavigator extends StatelessWidget {
         crossAxisCount: 5,
         padding: EdgeInsets.all(5.0),
         children: navigatorList.map((item) {
-          return _grtidViewItemUI(context, item);
+          tempIndex++;
+          return _grtidViewItemUI(context, item, tempIndex);
         }).toList(),
       ),
     );
@@ -309,10 +328,11 @@ class Recommend extends StatelessWidget {
   }
 
   //商品单独项
-  Widget _item(context,index) {
+  Widget _item(context, index) {
     return InkWell(
       onTap: () {
-        Application.router.navigateTo(context, '/detail?id=${recommendList[index]['goodsId']}');
+        Application.router.navigateTo(
+            context, '/detail?id=${recommendList[index]['goodsId']}');
       },
       child: Container(
         height: ScreenUtil().setHeight(330),
@@ -345,7 +365,7 @@ class Recommend extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: recommendList.length,
         itemBuilder: (context, index) {
-          return _item(context,index);
+          return _item(context, index);
         },
       ),
     );
@@ -394,11 +414,11 @@ class FloorContent extends StatelessWidget {
   Widget _firstRow(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItem(context,floorGoodsList[0]),
+        _goodsItem(context, floorGoodsList[0]),
         Column(
           children: <Widget>[
-            _goodsItem(context,floorGoodsList[1]),
-            _goodsItem(context,floorGoodsList[2]),
+            _goodsItem(context, floorGoodsList[1]),
+            _goodsItem(context, floorGoodsList[2]),
           ],
         ),
       ],
@@ -408,18 +428,19 @@ class FloorContent extends StatelessWidget {
   Widget _otherGoods(BuildContext context) {
     return Row(
       children: <Widget>[
-        _goodsItem(context,floorGoodsList[3]),
-        _goodsItem(context,floorGoodsList[4]),
+        _goodsItem(context, floorGoodsList[3]),
+        _goodsItem(context, floorGoodsList[4]),
       ],
     );
   }
 
-  Widget _goodsItem(BuildContext context,Map goods) {
+  Widget _goodsItem(BuildContext context, Map goods) {
     return Container(
       width: ScreenUtil().setWidth(375),
       child: InkWell(
         onTap: () {
-          Application.router.navigateTo(context, 'detail?id=${goods['goodsId']}');
+          Application.router
+              .navigateTo(context, 'detail?id=${goods['goodsId']}');
         },
         child: Image.network(goods['image']),
       ),

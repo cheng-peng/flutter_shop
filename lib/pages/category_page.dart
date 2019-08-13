@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_shop/routers/application.dart';
 import '../service/service_method.dart';
 import 'dart:convert';
 import '../model/category.dart';
@@ -54,22 +55,26 @@ class _LeftCategoryNavState extends State<LeftCategoryNav> {
     super.initState();
 
     _getCategory();
-    _getGoodsList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: ScreenUtil().setWidth(180),
-      decoration: BoxDecoration(
-          border: Border(right: BorderSide(width: 1, color: Colors.black12))),
-      child: ListView.builder(
-        itemCount: list.length,
-        itemBuilder: (context, index) {
-          return _leftInkWell(index);
-        },
-      ),
-    );
+    return Provide<ChildCategory>(builder: (context, child, val) {
+      _getGoodsList();
+
+      listIndex = val.categoryIndex;
+      return Container(
+        width: ScreenUtil().setWidth(180),
+        decoration: BoxDecoration(
+            border: Border(right: BorderSide(width: 1, color: Colors.black12))),
+        child: ListView.builder(
+          itemCount: list.length,
+          itemBuilder: (context, index) {
+            return _leftInkWell(index);
+          },
+        ),
+      );
+    });
   }
 
   Widget _leftInkWell(int index) {
@@ -283,8 +288,7 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
             gravity: ToastGravity.CENTER,
             backgroundColor: Colors.pink,
             textColor: Colors.white,
-            fontSize: 16.0
-            );
+            fontSize: 16.0);
         Provide.value<ChildCategory>(context).changeNoMore('没有更多了');
       } else {
         Provide.value<CategoryGoodsProvider>(context)
@@ -336,7 +340,10 @@ class _CategoryGoodsListState extends State<CategoryGoodsList> {
 
   Widget _listWidget(List newList, int index) {
     return InkWell(
-      onTap: () {},
+      onTap: () {
+        Application.router
+            .navigateTo(context, "/detail?id=${newList[index].goodsId}");
+      },
       child: Container(
         padding: EdgeInsets.only(top: 5, bottom: 5),
         decoration: BoxDecoration(
